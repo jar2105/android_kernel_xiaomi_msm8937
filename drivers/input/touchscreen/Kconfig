@@ -1161,4 +1161,7 @@ config TOUCHSCREEN_IST30XX
 
 source "drivers/input/touchscreen/IST30xx/Kconfig"
 
+config WAKE_GESTURES
+	bool "wake gestures"
+
 endif
