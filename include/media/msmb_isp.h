@@ -9,8 +9,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-#ifdef CONFIG_LAND_CAMERA
-#include "msmb_isp_land.h"
+#ifdef CONFIG_MACH_XIAOMI_LAND
+#include "msmb_isp-land.h"
 #else
 #ifndef __MSMB_ISP__
 #define __MSMB_ISP__
@@ -34,4 +34,4 @@ struct msm_isp_event_data32 {
 #endif
 
 #endif
-#endif
+#endif /* XIAOMI_LAND */

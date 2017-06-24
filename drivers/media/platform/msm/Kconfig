@@ -53,8 +53,8 @@ menuconfig LAND_CAMERA
 
 if MSMB_CAMERA
 source "drivers/media/platform/msm/camera_v2/Kconfig"
-if LAND_CAMERA
-source "drivers/media/platform/msm/camera_land_v2/Kconfig"
+if CONFIG_MACH_XIAOMI_LAND
+source "drivers/media/platform/msm/camera_v2-land/Kconfig"
 endif
 endif # MSMB_CAMERA
 source "drivers/media/platform/msm/dvb/Kconfig"
