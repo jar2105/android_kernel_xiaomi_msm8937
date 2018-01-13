@@ -4816,3 +4816,4 @@ static int __init msm_gcc_mdss_init(void)
 arch_initcall(msm_gcc_init);
 fs_initcall_sync(msm_gcc_mdss_init);
 late_initcall(msm_clock_debug_init);
+
