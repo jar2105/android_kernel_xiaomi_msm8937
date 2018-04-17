@@ -156,6 +156,10 @@ static struct proc_dir_entry *ft5x0x_proc_entry;
 static u8 is_ic_update_crash;
 static struct i2c_client *update_client;
 
+#ifdef CONFIG_WAKE_GESTURES
+static bool ts_suspended = false;
+#endif
+
 #if CTP_CHARGER_DETECT
 extern int power_supply_get_battery_charge_state(struct power_supply *psy);
 static struct power_supply *batt_psy;
@@ -210,9 +214,8 @@ static int focal_i2c_Read(unsigned char *writebuf,
 }
 
 #ifdef CONFIG_WAKE_GESTURES
-struct ft5x06_ts_data *ft5x06_ts = NULL;
 bool scr_suspended_ft(void) {
-	return ft5x06_ts->suspended;
+	return ts_suspended;
 }
 #endif
 
@@ -622,12 +625,12 @@ static int ft5x06_ts_suspend(struct device *dev)
 			input_sync(data->input_dev);
 			ev_btn_status = true;
 		}
+		ts_suspended = true;
 
 		err = enable_irq_wake(data->client->irq);
 		if (err)
 			dev_err(&data->client->dev,
 				"%s: set_irq_wake failed\n", __func__);
-		data->suspended = true;
 
 		if (dt2w_switch_changed) {
 			dt2w_switch = dt2w_switch_temp;
@@ -706,10 +709,10 @@ static int ft5x06_ts_resume(struct device *dev)
 			ev_btn_status = false;
 		}
 		err = disable_irq_wake(data->client->irq);
+		ts_suspended = false;
 		if (err)
 			dev_err(dev, "%s: disable_irq_wake failed\n",
 				__func__);
-		data->suspended = false;
 
 		return err;
 	}
@@ -2662,7 +2665,6 @@ static int ft5x06_ts_probe(struct i2c_client *client,
 	}
 
 #ifdef CONFIG_WAKE_GESTURES
-	ft5x06_ts = data;
 	device_init_wakeup(&client->dev, 1);
 #endif
 

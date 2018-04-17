@@ -115,6 +115,8 @@ int fhd_key_dim_x[] = { 0, FHD_MENU_KEY_X, FHD_HOME_KEY_X, FHD_BACK_KEY_X, };
 struct ist30xx_data *ts_data;
 struct ist30xx_data *global_ts_data;
 
+static bool ts_suspended = false;
+
 #if CTP_CHARGER_DETECT
 extern int power_supply_get_battery_charge_state(struct power_supply *psy);
 static struct power_supply *batt_psy;
@@ -201,9 +203,8 @@ void ist30xx_enable_irq(struct ist30xx_data *data)
 }
 
 #ifdef CONFIG_WAKE_GESTURES
-struct ist30xx_data *ist30xx_ts = NULL;
 bool scr_suspended_ist(void) {
-	return ist30xx_ts->suspended;
+	return ts_suspended;
 }
 #endif
 
@@ -1297,7 +1298,7 @@ static int ist30xx_suspend(struct device *dev)
 			ev_btn_status = true;
 		}
 		ist30xx_irq_handler(data->client->irq, true);
-		data->suspended = true;
+		ts_suspended = true;
 
 		if (dt2w_switch_changed) {
 			dt2w_switch = dt2w_switch_temp;
@@ -1332,10 +1333,6 @@ static int ist30xx_suspend(struct device *dev)
 #endif
 	mutex_unlock(&ist30xx_mutex);
 
-#ifdef CONFIG_WAKE_GESTURES
-	data->suspended = true;
-#endif
-
 	return 0;
 }
 
@@ -1358,7 +1355,7 @@ static int ist30xx_resume(struct device *dev)
 		}
 
 		ist30xx_irq_handler(data->client->irq, false);
-		data->suspended = false;
+		ts_suspended = false;
 
 		return 0;
 	}
@@ -1389,10 +1386,6 @@ static int ist30xx_resume(struct device *dev)
 #if CTP_CHARGER_DETECT
 	schedule_delayed_work(&data->work_charger_check,
 			      CHECK_CHARGER_INTERVAL);
-#endif
-
-#ifdef CONFIG_WAKE_GESTURES
-	data->suspended = false;
 #endif
 
 	return 0;
@@ -2142,7 +2135,6 @@ static int ist30xx_probe(struct i2c_client *client,
 		goto err_init_drv;
 
 #ifdef CONFIG_WAKE_GESTURES
-	ist30xx_ts = data;
 	device_init_wakeup(&client->dev, 1);
 #endif
 
@@ -2199,10 +2191,6 @@ static int ist30xx_probe(struct i2c_client *client,
 #if IST30XX_GESTURE
 	data->suspend = false;
 	data->gesture = false;
-#endif
-
-#ifdef CONFIG_WAKE_GESTURES
-	data->suspended = false;
 #endif
 	data->ignore_delay = false;
 	data->secure_mode = false;
