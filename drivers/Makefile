@@ -174,3 +174,5 @@ obj-$(CONFIG_SENSORS)		+= sensors/
 obj-$(CONFIG_SENSORS_SSC)	+= sensors/
 
 obj-$(CONFIG_FINGERPRINT)       += fingerprint/
+
+obj-$(CONFIG_DTS_EAGLE)		+= dts_eagle/
